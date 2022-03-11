@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useViewportScroll } from "framer-motion";
 import { useState } from "react";
 import { useQuery } from "react-query";
 import styled from "styled-components";
@@ -80,6 +80,24 @@ const Info = styled(motion.div)`
   }
 `;
 
+const Overlay = styled(motion.div)`
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  opacity: 0;
+`;
+
+const BigMovie = styled(motion.div)`
+  position: absolute;
+  width: 40vw;
+  height: 60vh;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+`;
+
 const rowVariants = {
   hidden: {
     x: window.outerWidth + 5,
@@ -123,6 +141,7 @@ const offset = 6;
 function Home() {
   const navigate = useNavigate();
   const bigMovieMatch = useMatch("/movies/:movieId");
+  const { scrollY } = useViewportScroll() 
   const { data, isLoading } = useQuery<IGetMoviesResult>(
     ["movies", "nowPlaying"],
     getMovies
@@ -142,7 +161,7 @@ function Home() {
   const onBoxClicked = (movieId: number) => {
     navigate(`/movies/${movieId}`);
   };
-
+  const onOverlayClick = () => navigate(`/`);
   return (
     <Wrapper>
       {isLoading ? (
@@ -190,19 +209,13 @@ function Home() {
           </Slider>
           <AnimatePresence>
             {bigMovieMatch ? (
-              <motion.div
+            <>
+              <Overlay onClick={onOverlayClick} animate={{opacity: 1}} exit={{opacity:0}} />
+              <BigMovie
                 layoutId={bigMovieMatch.params.movieId}
-                style={{
-                  position: "absolute",
-                  width: "40vw",
-                  height: "60vh",
-                  backgroundColor: "red",
-                  top: 50,
-                  left: 0,
-                  right: 0,
-                  margin: "0 auto",
-                }}
-              />
+                style={{top: scrollY.get() + 100}}
+              >Hello</BigMovie>
+            </>
             ) : null}
           </AnimatePresence>
         </>
